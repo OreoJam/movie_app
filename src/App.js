@@ -1,65 +1,56 @@
 import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-const foodILike = [
-  {
-    id: 1,
-    name: "Charvel",
-    image:
-      "https://upload.wikimedia.org/wikipedia/en/3/30/Charvel_guitars_logo.png",
-    rating: 3,
-  },
-  {
-    id: 2,
-    name: "Fender",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Fender_guitars_logo.svg/1280px-Fender_guitars_logo.svg.png",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Gibson",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Gibson_Guitar_logo.svg/1280px-Gibson_Guitar_logo.svg.png",
-    rating: 2,
-  },
-  {
-    id: 4,
-    name: "Gretsch",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/4/4f/Gretsch_company_logo.png",
-    rating: 2,
-  },
-  {
-    id: 5,
-    name: "Ibanez",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Ibanez_logo.svg/1280px-Ibanez_logo.svg.png",
-    rating: 5,
-  },
-  {
-    id: 6,
-    name: "Squier",
-    image:
-      "https://upload.wikimedia.org/wikipedia/commons/c/c6/Squier_guitars_logo.png",
-    rating: 4,
-  },
-];
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
 
-function Food({ name, picture }) {
-  return (
-    <div>
-      <h2>I like {name}</h2>
-      <img src={picture} alt={name} />
-    </div>
-  );
-}
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies, isLoading: false });
+  };
 
-function renderFood(dish) {
-  return <Food key={dish.id} name={dish.name} picture={dish.image} />;
-}
+  // render후에 호출됨
+  componentDidMount() {
+    this.getMovies();
+  }
 
-function App() {
-  return <div className="App">{foodILike.map(renderFood)}</div>;
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <section className="container">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
+  }
 }
 
 export default App;
